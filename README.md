@@ -6,8 +6,8 @@ This repository contains a reference implementation of [Envoy's Exth Authz serve
 
 There are currently a couple of issues on this repo which are being worked on...
 
-- issue 1: bazel gazelle breaking the WORKSPACE (see [Issue 1](#issue-1))
-- issue 2: building go_binary will result in multiple copies of package passed to linker (see [debug.log](debug.log))
+- issue 1: Bazel gazelle breaking the WORKSPACE (see [Issue 1](#issue-1))
+- issue 2: Any target that is dependent on `envoyproxy/go-control-plane` v3 API will fail to build. (see [Issue 2](#issue-2))
 
 ---
 
