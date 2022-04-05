@@ -14,7 +14,7 @@ There are currently a couple of issues on this repo which are being worked on...
 ## Requirements
 
 - [Go](https://golang.org/) (v1.16.x)
-- [Bazel](https://www.bazel.build/) (v3.7.2)
+- [Bazel](https://www.bazel.build/) (v5.0.0)
 - [Docker & Docker-Compose](https://docs.docker.com/get-docker/)
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - [Task](https://taskfile.dev/#/) (v3.3.0) (Already installed on the devcontainer)
