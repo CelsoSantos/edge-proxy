@@ -11,8 +11,8 @@ filegroup(
 filegroup(
     name = "all_rules",
     srcs = glob(["*.bzl"]) + [
-      "//bazel/private:all_rules",
-      "//bazel/toolchains:all_rules",
+        "//bazel/private:all_rules",
+        "//bazel/toolchains:all_rules",
     ],
     visibility = ["//visibility:public"],
 )

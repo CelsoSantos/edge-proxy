@@ -1,0 +1,129 @@
+# This file extension NEEDS to be .yml, since that is the default Task uses
+version: '3'
+
+env:
+  ARG_BAZEL_VERSION: 3.6.0
+
+tasks:
+
+  clean-status:
+    desc: Clean the .status and .metadata fields from Gloo files
+    cmds: 
+      - ./tools/scripts/pre-commit
+
+  install-bazel:
+    desc: Installs Bazel
+    cmds:
+      - curl -LO "https://github.com/bazelbuild/bazel/releases/download/${ARG_BAZEL_VERSION}/bazel_${ARG_BAZEL_VERSION}-linux-x86_64.deb" && sudo dpkg -i bazel_*.deb && sudo rm -rf bazel_*.deb
+
+  # Usage: task init -- <path/to/target/dir>
+  init:
+    desc: Prepares the Gloo data directory with requireds directories
+    cmds: 
+      - ./tools/scripts/prepare-directories.sh {{.CLI_ARGS}}
+
+  # Update Golang modules repositories
+  #
+  # This command is to be executed each time a new module is added, removed, or modified
+  # in the require section of the 'go.mod' file.
+  update-modules:
+    desc: Updates the go modules
+    cmds:
+      - bazel run //:gazelle -- update-repos -from_file=./go.mod -to_macro=./bazel/private/repositories.bzl%proxy_dependencies
+      # - bazel run //:gazelle -- update-repos -from_file=./go.mod -build_file_proto_mode=disable_global -to_macro=./bazel/private/repositories.bzl%proxy_dependencies
+
+  # Creates a JWKS on a given path/location
+  # Usage: task keygen -- <path/to/target/dir>
+  keygen:
+    desc: Generates a public-private key pair for signing the tokena
+    cmds:
+      - ./tools/scripts/gen-jwks.sh {{.CLI_ARGS}}
+
+  # Creates a self-signed SSL certificate on a given path/location
+  # Usage: task sslgen -- <path/to/target/dir>
+  tlsgen:
+    desc: Generates a public-private key pair for signing the tokena
+    cmds:
+      - ./tools/scripts/gen-tls.sh {{.CLI_ARGS}}
+
+  # Usage: task encrypt -- <path/to/key/file.json>
+  encrypt:
+    desc: Cipher a key file on the workspace
+    cmds:
+      - sops -e -i {{.CLI_ARGS}}
+
+  ### 
+  # Advisory
+  ###
+
+  build-advisory:
+    desc: Build the ext-authz binary for Advisory
+    cmds:
+      - bazel build //cmd/auth_server_advisory:advisory_authz_service
+
+  build-advisory-image:
+    desc: Build the ext-authz container image for Advisory
+    cmds:
+      - bazel run //cmd/auth_server_advisory:advisory_authz_service_image_build
+
+  publish-advisory:
+    desc: Publish a new ext-authz container image for Advisory
+    cmds:
+      - bazel run //cmd/auth_server_advisory:advisory_authz_service_image_push
+
+  ### 
+  # IAMs
+  ###
+
+  build-iam:
+    desc: Build the ext-authz binary for IAMs
+    cmds:
+      - bazel build //cmd/auth_server_iam:iam_authz_service
+
+  build-iam-image:
+    desc: Build the ext-authz container image for IAMs
+    cmds:
+      - bazel run //cmd/auth_server_iam:iam_authz_service_image_build
+
+  publish-iam:
+    desc: Publish a new ext-authz container image for IAMs
+    cmds:
+      - bazel run --define TAG={{.TAG}} //cmd/auth_server_iam:iam_authz_service_image_push
+
+  ### 
+  # JPM
+  ###
+
+  build-jpm:
+    desc: Build the ext-authz binary for JPM
+    cmds:
+      - bazel build //cmd/auth_server_jpm:jpm_authz_service
+
+  build-jpm-image:
+    desc: Build the ext-authz container image for JPM
+    cmds:
+      - bazel run //cmd/auth_server_jpm:jpm_authz_service_image_build
+
+  publish-jpm:
+    desc: Publish a new ext-authz container image for JPM
+    cmds:
+      - bazel run --define TAG={{.TAG}} //cmd/auth_server_jpm:jpm_authz_service_image_push
+
+  ### 
+  # DBS
+  ###
+
+  build-dbs:
+    desc: Build the ext-authz binary for DBS
+    cmds:
+      - bazel build //cmd/auth_server_dbs:dbs_authz_service
+
+  build-dbs-image:
+    desc: Build the ext-authz container image for DBS
+    cmds:
+      - bazel run //cmd/auth_server_dbs:dbs_authz_service_image_build
+
+  publish-dbs:
+    desc: Publish a new ext-authz container image for DBS
+    cmds:
+      - bazel run --define TAG={{.TAG}} //cmd/auth_server_dbs:dbs_authz_service_image_push

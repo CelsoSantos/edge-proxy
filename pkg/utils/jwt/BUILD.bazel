@@ -3,10 +3,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 # -----------------------------------------------------------------------------
 
 go_library(
-    name = "go_default_library",
-    srcs = [
-        "jwt_utils.go",
-    ],
+    name = "jwt",
+    srcs = ["jwt_utils.go"],
     importpath = "github.com/celsosantos/edge-proxy/pkg/utils/jwt",
     visibility = ["//visibility:public"],
     deps = [

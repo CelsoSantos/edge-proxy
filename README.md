@@ -17,6 +17,7 @@ There are currently a couple of issues on this repo which are being worked on...
 - [Bazel](https://www.bazel.build/) (v3.7.2)
 - [Docker & Docker-Compose](https://docs.docker.com/get-docker/)
 - [Visual Studio Code](https://code.visualstudio.com/download)
+- [Task](https://taskfile.dev/#/) (v3.3.0) (Already installed on the devcontainer)
 
 ---
 
@@ -31,17 +32,19 @@ Start by creating a `devcontainer.json` file inside your local `.devcontainer` d
 
 ---
 
-## Makefile
+## Taskfile
 
-This repo includes a Makefile which includes all the targets required for both Development as well as building and releasing the Edge Proxy.
+This repo includes a Taskfile which includes all the targets required for both Development as well as building and releasing the Edge Proxy Plugins.
 
-**You SHOULD use `make` to perform most of the tasks required**
+> :warning: **You SHOULD use `task` (included in the devcontainer) to perform most of the tasks required**
+
+For detailed information regarding the use of `task` please refer to the original docs at [Task.dev](https://taskfile.dev/#/).
 
 ## Issues
 
 ### Issue 1
 
-When running `make update_repos`, this will update the go modules, however, it will also produce a 4-line entry on the WORKSPACE that **MUST** be removed before continuing to run bazel commands. The lines to remove are these and are inserted on lines 136-139:
+When running `task update-modules`, this will update the go modules, however, it will also produce a 4-line entry on the `WORKSPACE` that **MUST** be removed before continuing to run bazel commands. These inserted lines already exist elsewhere on the `WORKSPACE` The lines to remove are these and are inserted around lines 138-141:
 
 ```bazel
 load("//:./bazel/private/repositories.bzl", "proxy_dependencies")
@@ -54,14 +57,40 @@ I have not yet been able to figure out why this is happening, but the solution i
 
 ### Issue 2
 
-Attempting to build a `go_binary` will result in
+Any target that is dependent on `envoyproxy/go-control-plane` v3 API will fail to build.
+To reproduce the issue, from within the devcontainer, see the output of the build of the `api` or `pkg/domains/clientcompany/auth` in the two different versions.
+v2 builds work fine but v3 builds fail.
 
-```sh
-link: package conflict error: github.com/golang/protobuf/ptypes/any: multiple copies of package passed to linker:
-        @com_github_golang_protobuf//ptypes/any:any
-        @io_bazel_rules_go//proto/wkt:any_go_proto
-Set "importmap" to different paths or use 'bazel cquery' to ensure only one
-package with this path is linked.
+Here's the sample output of running the builds for `api/v2` and `api/v3`:
+
+
+- v2 envoy API
+
+```shell
+$ bazel build //api/v2:api
+
+WARNING: Download from https://mirror.bazel.build/github.com/googleapis/googleapis/archive/9acf39829240ef41f5adb762a29b87bc6eeee728.zip failed: class java.io.FileNotFoundException GET returned 404 Not Found
+DEBUG: /root/.cache/bazel/_bazel_root/eab0d61a99b6696edb3d2aff87b585e8/external/bazel_gazelle/internal/go_repository.bzl:262:18: org_golang_x_net: gazelle: finding module path for import golang.org/x/sys/windows: finding module path for import golang.org/x/sys/windows: package golang.org/x/sys/windows: build constraints exclude all Go files in /root/.cache/bazel/_bazel_root/eab0d61a99b6696edb3d2aff87b585e8/external/bazel_gazelle_go_repository_cache/pkg/mod/golang.org/x/sys@v0.0.0-20220405052023-b1e9470b6e64/windows
+gazelle: finding module path for import golang.org/x/sys/windows: finding module path for import golang.org/x/sys/windows: package golang.org/x/sys/windows: build constraints exclude all Go files in /root/.cache/bazel/_bazel_root/eab0d61a99b6696edb3d2aff87b585e8/external/bazel_gazelle_go_repository_cache/pkg/mod/golang.org/x/sys@v0.0.0-20220405052023-b1e9470b6e64/windows
+gazelle: finding module path for import golang.org/x/sys/windows: finding module path for import golang.org/x/sys/windows: package golang.org/x/sys/windows: build constraints exclude all Go files in /root/.cache/bazel/_bazel_root/eab0d61a99b6696edb3d2aff87b585e8/external/bazel_gazelle_go_repository_cache/pkg/mod/golang.org/x/sys@v0.0.0-20220405052023-b1e9470b6e64/windows
+WARNING: Download from https://mirror.bazel.build/github.com/golang/sys/archive/b874c991c1a50803422b257fb721b0b2dee3cf72.zip failed: class java.io.FileNotFoundException GET returned 404 Not Found
+INFO: Analyzed target //api/v2:api (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Target //api/v2:api up-to-date:
+  bazel-bin/api/v2/api.a
+INFO: Elapsed time: 0.584s, Critical Path: 0.01s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
 ```
 
-Running `bazel cquery` has pointed this to be an issue with either `envoyproxy/protoc-gen-validate` or `envoyproxy/go-control-plane`. The [debug.log](debug.log) has more details into this issue
+- v3 envoy API
+
+```shell
+$ bazel build //api/v3:api
+
+ERROR: /workspace/api/v3/BUILD.bazel:5:11: no such package '@com_github_envoyproxy_go_control_plane//envoy/service/auth/v3': BUILD file not found in directory 'envoy/service/auth/v3' of external repository @com_github_envoyproxy_go_control_plane. Add a BUILD file to a directory to mark it as a package. and referenced by '//api/v3:api'
+ERROR: Analysis of target '//api/v3:api' failed; build aborted: Analysis failed
+INFO: Elapsed time: 0.446s
+INFO: 0 processes.
+FAILED: Build did NOT complete successfully (0 packages loaded, 0 targets configured)
+```

@@ -5,20 +5,18 @@ workspace(name = "edge-proxy")
 # -----------------------------------------------------------------------------
 
 # Requisite minimal Golang toolchain version
-MINIMAL_GOLANG_VERSION = "1.16.3"
+MINIMAL_GOLANG_VERSION = "1.16"
 
 # Requisite minimal Bazel version requested to build this project
-MINIMAL_BAZEL_VERSION = "3.7.2"
+MINIMAL_BAZEL_VERSION = "5.0.0"
 
 # Requisite minimal Gazelle version compatible with Golang Bazel rules
-MINIMAL_GAZELLE_VERSION = "0.23.0"
+MINIMAL_GAZELLE_VERSION = "0.22.2"
 
 # Requisite minimal Golang Bazel rules (must be set in accordance with minimal Gazelle version)
 #
 # @see https://github.com/bazelbuild/bazel-gazelle#compatibility)
-MINIMAL_GOLANG_BAZEL_RULES_VERSION = "0.27.0"
-
-MINIMAL_GOLANG_BAZEL_RULES_SHASUM = "69de5c704a05ff37862f7e0f5534d4f479418afc21806c887db544a316f3cb6b"
+MINIMAL_GOLANG_BAZEL_RULES_VERSION = "0.24.3"
 
 # -----------------------------------------------------------------------------
 # Basic Bazel settings
@@ -29,10 +27,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Import Bazel Skylib repository into the workspace
 http_archive(
     name = "bazel_skylib",
-    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+    sha256 = "f7be3474d42aae265405a592bb7da8e171919d74c16f082a5457840f06054728",
     urls = [
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
     ],
 )
 
@@ -53,11 +51,10 @@ bazel_skylib_workspace()
 # Fetch Protobuf dependencies
 http_archive(
     name = "rules_proto",
-    sha256 = "602e7161d9195e50246177e7c55b2f39950a9cf7366f74ed5f22fd45750cd208",
-    strip_prefix = "rules_proto-97d8af4dc474595af3900dd85cb3a29ad28cc313",
+    sha256 = "9850fcf6ad40fa348e6f13b2cfef4bb4639762f804794f2bf61d988f4ba0dae9",
+    strip_prefix = "rules_proto-4.0.0-3.19.2-2",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/97d8af4dc474595af3900dd85cb3a29ad28cc313.tar.gz",
-        "https://github.com/bazelbuild/rules_proto/archive/97d8af4dc474595af3900dd85cb3a29ad28cc313.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0-3.19.2-2.tar.gz",
     ],
 )
 
@@ -70,24 +67,29 @@ rules_proto_toolchains()
 # Fetch gRPC and Protobuf dependencies (should be fetched before Go rules)
 http_archive(
     name = "build_stack_rules_proto",
-    sha256 = "d456a22a6a8d577499440e8408fc64396486291b570963f7b157f775be11823e",
-    strip_prefix = "rules_proto-b2913e6340bcbffb46793045ecac928dcf1b34a5",
-    urls = ["https://github.com/stackb/rules_proto/archive/b2913e6340bcbffb46793045ecac928dcf1b34a5.tar.gz"],
+    sha256 = "8ce4f6630c8a277a78c05c2193da4b4687c208f0ce5a88e9cbf10150508c6fa0",
+    strip_prefix = "rules_proto-0160632ba19048c87c84a46f788cf89738f223cf",
+    urls = ["https://github.com/stackb/rules_proto/archive/0160632ba19048c87c84a46f788cf89738f223cf.tar.gz"],
 )
 
-load("@build_stack_rules_proto//go:deps.bzl", "go_proto_library")
+# load("@build_stack_rules_proto//go:deps.bzl", "go_proto_library")
+register_toolchains("@build_stack_rules_proto//toolchain:standard")
 
-go_proto_library(compilers = ["@io_bazel_rules_go//proto:go_grpc"])
+# go_proto_library(compilers = ["@io_bazel_rules_go//proto:go_grpc"])
 
-go_proto_library()
+# go_proto_library()
+
+load("@build_stack_rules_proto//deps:core_deps.bzl", "core_deps")
+
+core_deps()
 
 # Import Golang Bazel repository into the workspace
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "69de5c704a05ff37862f7e0f5534d4f479418afc21806c887db544a316f3cb6b",
+    sha256 = "f2dcd210c7095febe54b804bb1cd3a58fe8435a909db2ec04e31542631cf715c",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.27.0/rules_go-v0.27.0.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.27.0/rules_go-v0.27.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
     ],
 )
 
@@ -124,10 +126,10 @@ go_register_toolchains(version = "1.16")
 # Import Gazelle repository into the workspace
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "62ca106be173579c0a167deb23358fdfe71ffa1e4cfdddf5582af26520f1c66f",
+    sha256 = "5982e5463f171da99e3bdaeff8c0f48283a7a5f396ec5282910b9e8a49c0dd7e",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.23.0/bazel-gazelle-v0.23.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.25.0/bazel-gazelle-v0.25.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.25.0/bazel-gazelle-v0.25.0.tar.gz",
     ],
 )
 
@@ -144,9 +146,9 @@ gazelle_dependencies()
 # are previously loaded - see above Go rules section in this file
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "95d39fd84ff4474babaf190450ee034d958202043e366b9fc38f438c9e6c3334",
-    strip_prefix = "rules_docker-0.16.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.16.0/rules_docker-v0.16.0.tar.gz"],
+    sha256 = "85ffff62a4c22a74dbd98d05da6cf40f497344b3dbf1e1ab0a37ab2a1a6ca014",
+    strip_prefix = "rules_docker-0.23.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.23.0/rules_docker-v0.23.0.tar.gz"],
 )
 
 # Load the macro that allows you to customize the docker toolchain configuration.
@@ -197,32 +199,36 @@ load(
 container_pull(
     name = "go_base_debian10",
     # 'tag' is also supported, but digest is encouraged for reproducibility.
-    digest = "sha256:75f63d4edd703030d4312dc7528a349ca34d48bec7bd754652b2d47e5a0b7873",
+    digest = "sha256:7d57eac73dd3bbe097632d6b3b2cb1fee8368f8731ade38f49c67df9285bc473",
     registry = "gcr.io",
     repository = "distroless/base-debian10",
 )
 
-# -----------------------------------------------------------------------------
-# Python Toolchain (for Devcontainer)
-# -----------------------------------------------------------------------------
+# # -----------------------------------------------------------------------------
+# # Python Toolchain (for Devcontainer)
+# # -----------------------------------------------------------------------------
 # http_archive(
 #     name = "rules_python",
-#     sha256 = "e46612e9bb0dae8745de6a0643be69e8665a03f63163ac6610c210e80d14c3e4",
-#     url = "https://github.com/bazelbuild/rules_python/releases/download/0.0.3/rules_python-0.0.3.tar.gz",
+#     sha256 = "9fcf91dbcc31fde6d1edb15f117246d912c33c36f44cf681976bd886538deba6",
+#     strip_prefix = "rules_python-0.8.0",
+#     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.8.0.tar.gz",
 # )
 
-# # This call should always be present.
-# load("@rules_python//python:repositories.bzl", "py_repositories")
+# load("@rules_python//python:repositories.bzl", "python_register_toolchains")
 
-# py_repositories()
+# python_register_toolchains(
+#     name = "python3_9",
+#     # Available versions are listed in @rules_python//python:versions.bzl.
+#     # We recommend using the same version your team is already standardized on.
+#     python_version = "3.9",
+# )
 
 # -----------------------------------------------------------------------------
 # Register the Python toolchains
 # -----------------------------------------------------------------------------
-# load("//bazel:dependencies.bzl", "proxy_dependencies", "py_register_toolchains")
-load("//bazel:dependencies.bzl", "proxy_dependencies")
+load("//bazel:dependencies.bzl", "proxy_dependencies", "py_register_toolchains")
 
-# py_register_toolchains()
+py_register_toolchains()
 
 # -----------------------------------------------------------------------------
 # Proxy external dependencies

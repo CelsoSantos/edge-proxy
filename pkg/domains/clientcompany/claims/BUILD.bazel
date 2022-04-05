@@ -3,14 +3,12 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 # -----------------------------------------------------------------------------
 
 go_library(
-    name = "go_default_library",
-    srcs = [
-        "clientcompany_claims.go",
-    ],
+    name = "claims",
+    srcs = ["clientcompany_claims.go"],
     importpath = "github.com/celsosantos/edge-proxy/pkg/domains/clientcompany/claims",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/domains/mycompany/claims:go_default_library",
+        "//pkg/domains/mycompany/claims",
     ],
 )
 

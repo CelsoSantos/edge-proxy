@@ -8,20 +8,18 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_image", "cont
 ## Build authz server binary
 go_binary(
     name = "authz_service",
-    embed = [":go_default_library"],
+    embed = [":auth_server_v3_lib"],
     pure = "off",
     visibility = ["//visibility:public"],
 )
 
 go_library(
-    name = "go_default_library",
-    srcs = [
-        "main.go",
-    ],
+    name = "auth_server_v3_lib",
+    srcs = ["main.go"],
     importpath = "github.com/celsosantos/edge-proxy/cmd/auth_server_v3",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/domains/clientcompany/auth/v3:go_default_library",
+        "//pkg/domains/clientcompany/auth/v3:auth",
         "@com_github_envoyproxy_go_control_plane//envoy/service/auth/v3:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
     ],
@@ -31,25 +29,25 @@ go_library(
 pkg_tar(
     name = "key_tar",
     srcs = ["//keys:jwks.json"],
-    package_dir = "/etc/keys",
     mode = "0o600",
     owner = "65534.65534",
+    package_dir = "/etc/keys",
     visibility = ["//visibility:public"],
 )
 
 ## Build and push ext-authz container image
 go_image(
     name = "authz_service_image_base",
-    binary = ":authz_service",
     # Override the base image.
     base = "@go_base_debian10//image",
+    binary = ":authz_service",
 )
 
 container_image(
     name = "authz_service_image_build",
     base = ":authz_service_image_base",
     ports = ["9001"],
-    stamp = True
+    stamp = True,
 )
 
 container_push(

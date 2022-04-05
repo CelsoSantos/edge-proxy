@@ -7,7 +7,4 @@ py_runtimes()
 
 ### Macros
 # gazelle:prefix github.com/celsosantos/edge-proxy
-# gazelle:repository_macro ./bazel/private/repositories.bzl%proxy_dependencies
-# gazelle:proto disable_global
-
 gazelle(name = "gazelle")

@@ -3,14 +3,12 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 # -----------------------------------------------------------------------------
 
 go_library(
-    name = "go_default_library",
-    srcs = [
-        "mycompany_claims.go",
-    ],
+    name = "claims",
+    srcs = ["mycompany_claims.go"],
     importpath = "github.com/celsosantos/edge-proxy/pkg/domains/mycompany/claims",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/utils/jwt:go_default_library",
+        "//pkg/utils/jwt",
         "@com_github_dgrijalva_jwt_go//:go_default_library",
     ],
 )
