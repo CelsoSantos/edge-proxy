@@ -25,16 +25,6 @@ go_library(
     ],
 )
 
-## Package configurations
-pkg_tar(
-    name = "key_tar",
-    srcs = ["//keys:jwks.json"],
-    mode = "0o600",
-    owner = "65534.65534",
-    package_dir = "/etc/keys",
-    visibility = ["//visibility:public"],
-)
-
 ## Build and push ext-authz container image
 go_image(
     name = "authz_service_image_base",
@@ -47,8 +37,7 @@ container_image(
     name = "authz_service_image_build",
     base = ":authz_service_image_base",
     ports = ["9001"],
-    stamp = True,
-    tars = [":key_tar"],
+    # stamp = True,
 )
 
 container_push(

@@ -133,8 +133,17 @@ http_archive(
     ],
 )
 
+# -----------------------------------------------------------------------------
 # Fetch Gazelle dependencies
+# -----------------------------------------------------------------------------
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("//bazel:dependencies.bzl", "proxy_dependencies", "py_register_toolchains")
+
+# Proxy external dependencies
+proxy_dependencies()
+
+# # Register the Python toolchains
+# py_register_toolchains()
 
 gazelle_dependencies()
 
@@ -222,16 +231,3 @@ container_pull(
 #     # We recommend using the same version your team is already standardized on.
 #     python_version = "3.9",
 # )
-
-# -----------------------------------------------------------------------------
-# Register the Python toolchains
-# -----------------------------------------------------------------------------
-load("//bazel:dependencies.bzl", "proxy_dependencies", "py_register_toolchains")
-
-py_register_toolchains()
-
-# -----------------------------------------------------------------------------
-# Proxy external dependencies
-# -----------------------------------------------------------------------------
-
-proxy_dependencies()

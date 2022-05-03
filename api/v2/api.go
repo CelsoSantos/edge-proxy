@@ -1,4 +1,4 @@
-package api
+package api_v2
 
 import (
 	envoyapiv2core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"

@@ -47,7 +47,7 @@ container_image(
     name = "authz_service_image_build",
     base = ":authz_service_image_base",
     ports = ["9001"],
-    stamp = True,
+    # stamp = True,
 )
 
 container_push(
