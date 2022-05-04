@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	utils "github.com/celsosantos/edge-proxy/pkg/utils/jwt"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 var ttl time.Duration = 7200 // Default TTL: 7200s = 2h

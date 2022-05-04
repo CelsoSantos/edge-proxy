@@ -14,9 +14,9 @@
 # file. This feature will certainly be available soon... so let's be prepared.
 # -----------------------------------------------------------------------------
 
-ARG USE_BAZEL_VERSION=5.0.0
-ARG ARG_TASK_VERSION=3.3.0
-ARG SOPS_VERSION=3.6.1
+ARG USE_BAZEL_VERSION=5.1.1
+ARG ARG_TASK_VERSION=3.12.0
+ARG SOPS_VERSION=3.7.2
 
 # -----------------------------------------------------------------------------
 # SANDBOX STAGE

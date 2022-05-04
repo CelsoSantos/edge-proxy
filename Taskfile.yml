@@ -29,8 +29,8 @@ tasks:
   update-modules:
     desc: Updates the go modules
     cmds:
-      - bazel run //:gazelle -- update-repos -from_file=./go.mod -to_macro=./bazel/private/repositories.bzl%proxy_dependencies
-      # - bazel run //:gazelle -- update-repos -from_file=./go.mod -build_file_proto_mode=disable_global -to_macro=./bazel/private/repositories.bzl%proxy_dependencies
+      # - bazel run //:gazelle -- update-repos -from_file=./go.mod -to_macro=./bazel/private/repositories.bzl%proxy_dependencies
+      - bazel run //:gazelle -- update-repos -from_file=./go.mod -prune=true -build_file_proto_mode=disable_global -to_macro=./bazel/private/repositories.bzl%proxy_dependencies
 
   # Creates a JWKS on a given path/location
   # Usage: task keygen -- <path/to/target/dir>
@@ -51,79 +51,32 @@ tasks:
     desc: Cipher a key file on the workspace
     cmds:
       - sops -e -i {{.CLI_ARGS}}
-
-  ### 
-  # Advisory
-  ###
-
-  build-advisory:
-    desc: Build the ext-authz binary for Advisory
-    cmds:
-      - bazel build //cmd/auth_server_advisory:advisory_authz_service
-
-  build-advisory-image:
-    desc: Build the ext-authz container image for Advisory
-    cmds:
-      - bazel run //cmd/auth_server_advisory:advisory_authz_service_image_build
-
-  publish-advisory:
-    desc: Publish a new ext-authz container image for Advisory
-    cmds:
-      - bazel run //cmd/auth_server_advisory:advisory_authz_service_image_push
-
+      
   ### 
   # IAMs
   ###
 
-  build-iam:
-    desc: Build the ext-authz binary for IAMs
+  build-server-v2:
+    desc: Build the ext-authz binary for v2
     cmds:
-      - bazel build //cmd/auth_server_iam:iam_authz_service
+      - bazel build //cmd/auth_server_v2:iam_authz_service
 
-  build-iam-image:
-    desc: Build the ext-authz container image for IAMs
+  build-server-v3:
+    desc: Build the ext-authz binary for v3
     cmds:
-      - bazel run //cmd/auth_server_iam:iam_authz_service_image_build
+      - bazel build //cmd/auth_server_v3:iam_authz_service
+
+  build-server-image-v2:
+    desc: Build the ext-authz container image for v2
+    cmds:
+      - bazel run //cmd/auth_server_v2:authz_service_image_build
+
+  build-server-image-v3:
+    desc: Build the ext-authz container image for v3
+    cmds:
+      - bazel run //cmd/auth_server_v3:authz_service_image_build
 
   publish-iam:
     desc: Publish a new ext-authz container image for IAMs
     cmds:
       - bazel run --define TAG={{.TAG}} //cmd/auth_server_iam:iam_authz_service_image_push
-
-  ### 
-  # JPM
-  ###
-
-  build-jpm:
-    desc: Build the ext-authz binary for JPM
-    cmds:
-      - bazel build //cmd/auth_server_jpm:jpm_authz_service
-
-  build-jpm-image:
-    desc: Build the ext-authz container image for JPM
-    cmds:
-      - bazel run //cmd/auth_server_jpm:jpm_authz_service_image_build
-
-  publish-jpm:
-    desc: Publish a new ext-authz container image for JPM
-    cmds:
-      - bazel run --define TAG={{.TAG}} //cmd/auth_server_jpm:jpm_authz_service_image_push
-
-  ### 
-  # DBS
-  ###
-
-  build-dbs:
-    desc: Build the ext-authz binary for DBS
-    cmds:
-      - bazel build //cmd/auth_server_dbs:dbs_authz_service
-
-  build-dbs-image:
-    desc: Build the ext-authz container image for DBS
-    cmds:
-      - bazel run //cmd/auth_server_dbs:dbs_authz_service_image_build
-
-  publish-dbs:
-    desc: Publish a new ext-authz container image for DBS
-    cmds:
-      - bazel run --define TAG={{.TAG}} //cmd/auth_server_dbs:dbs_authz_service_image_push
